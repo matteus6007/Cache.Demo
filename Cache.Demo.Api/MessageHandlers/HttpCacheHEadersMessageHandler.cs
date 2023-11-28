@@ -14,8 +14,8 @@ namespace Cache.Demo.Api.MessageHandlers
     /// </summary>
     public class HttpCacheHeadersMessageHandler : DelegatingHandler
     {
-        private const string CacheBustKey = "X-Cache-Bust";
-        private static readonly string[] IgnoredHeaders = new[] { "Authorization", "Api-Key", "X-Api-Key" };
+        private const string _cacheBustKey = "X-Cache-Bust";
+        private static readonly string[] _ignoredHeaders = new[] { "Authorization", "Api-Key", "X-Api-Key" };
         private readonly IMemoryCache _cache;
         private readonly IHttpContextAccessor _httpContextAccesor;
         private readonly CachingOptions _options;
@@ -40,12 +40,12 @@ namespace Cache.Demo.Api.MessageHandlers
             }
 
             // bypass caching
-            if (_httpContextAccesor.HttpContext?.Request.Headers.ContainsKey(CacheBustKey) == true)
+            if (_httpContextAccesor.HttpContext?.Request.Headers.ContainsKey(_cacheBustKey) == true)
             {
                 return await base.SendAsync(request, cancellationToken);
             }
 
-            var key = request.GetRequestKey(IgnoredHeaders).ToSha256();
+            var key = request.GetRequestKey(_ignoredHeaders).ToSha256();
 
             if (_cache.TryGetValue<CachedHttpContent>(key, out var cachedEntry)
                 && cachedEntry?.Etag is { } eTag)
